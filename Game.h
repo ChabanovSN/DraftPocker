@@ -148,13 +148,13 @@ private:
         if(player.size()>0){
             auto first = player.front(); // переход очереди
           //  first->setDiller(0);
-            player.erase(player.begin());
+            player.pop_front();
           //  player.at(0)->setDiller(1);
             player.push_back(first);
         }
     }
     int bank=0,stavka = 0, fixStavka=0;
-    vector<Player *> player;
+    deque<Player *> player;
     CardDeck * steak;
     vector<Card *> commonCards;
     bool endGame=false;
