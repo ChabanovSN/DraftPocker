@@ -4,6 +4,7 @@
 class Player{
     string name="";
     vector <Card *> cards;
+    int statusWinner = 100; // поиск среди победителей с минимальным статусом
     bool winner=false;
     bool diller=false;
     bool fold =false;
@@ -24,6 +25,7 @@ public:
     void show(){
         if(winner)cout<<"Winner ";
         else cout<<"Loser ";
+        cout<<statusWinner<<" ";
         cout<<name<<" has: ";
         for(auto c :cards)
             cout<<c->rang<<" ";
@@ -113,6 +115,8 @@ public:
     pair<int,int>  getCombLast(){
         return   comb_and_last;
     }
+    void setStatusWinner(int s){statusWinner=s;}
+    int getStatusWinner(){return statusWinner;}
 };
 
 #endif // PLAYER_H
