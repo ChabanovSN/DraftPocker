@@ -2,6 +2,7 @@
 #define FINDWINNER_H
 #include"Game.h"
 #include <utility>
+#include<algorithm>
 #include<map>
 static vector<Card *> Royal_Flush[4]={{new Card("D14A"),new Card("D13K"),new Card("D12L"),
                                        new Card("D11J"),new Card("D10")},
@@ -17,26 +18,167 @@ static vector<Card *> Royal_Flush[4]={{new Card("D14A"),new Card("D13K"),new Car
 
 
 class FindWinner{
+    static pair<int,int> one_pair(vector<Card*> &user){
+        sort(user.begin(), user.end(),sort_q);
+        map<int,int,greater <int> > countUniq;
+        countUniq[user[0]->cost]=1;
+        map<int,int>::iterator it;
+        int comb2=0;
+        for(size_t i=1;i<user.size();i++){
+            it = countUniq.find(user[i]->cost);
+            if(it == countUniq.end())
+                countUniq[user[i]->cost]=1;
+            else
+                it->second++;
+        }
+        int maxC = 0;
+        for(auto e : countUniq){
+
+            if(e.second==2){
+                comb2=e.first;
+
+            }
+            if(e.second==1)
+                if(maxC<e.first)
+                    maxC=e.first;
+        }
+
+        if( comb2 && maxC)
+            return make_pair(comb2,maxC);
+
+        return make_pair(0,0);
+    }
+    static pair<int,int> two_pair(vector<Card*> &user){
+        sort(user.begin(), user.end(),sort_q);
+        // show(user);
+        map<int,int,greater <int> > countUniq;
+        countUniq[user[0]->cost]=1;
+        map<int,int>::iterator it;
+        int comb2_B=0, comb2_S=0;
+        for(size_t i=1;i<user.size();i++){
+            it = countUniq.find(user[i]->cost);
+            if(it == countUniq.end())
+                countUniq[user[i]->cost]=1;
+            else
+                it->second++;
+        }
+
+        for(auto e : countUniq){
+            //   cout<<e.first<<" * "<<e.second<<endl;
+            if(e.second==2 && comb2_B == 0 )comb2_B=e.first;
+            else if(e.second==2 && comb2_B != 0 )comb2_S=e.first;
+        }
+
+        if(comb2_B && comb2_S)
+            return make_pair(comb2_B,comb2_S);
+        return make_pair(0,0);
+    }
+    static pair<int,int> three_of_kind(vector<Card*> &user){
+        sort(user.begin(), user.end(),sort_q);
+        map<int,int> countUniq;
+        countUniq[user[0]->cost]=1;
+        map<int,int>::iterator it;
+        int comb3=0, maxC=0;
+        for(size_t i=1;i<user.size();i++){
+            it = countUniq.find(user[i]->cost);
+            if(it == countUniq.end())
+                countUniq[user[i]->cost]=1;
+            else
+                it->second++;
+        }
+
+        for(auto e :countUniq){
+            if(e.second==3)comb3=e.first;
+            if(e.second==1)
+                if(maxC <e.first)
+                    maxC=e.first;
+        }
+        if(comb3 && maxC)
+            return make_pair(comb3,maxC);
+        return make_pair(0,0);
+    }
+    static pair<int,int> straight(vector<Card*> &user){
+        sort(user.begin(), user.end(),sort_cost);
+
+        int score, checkQueue,counter=1;
+        score=checkQueue=user[0]->cost;
+        size_t i=1;
+        if(user[0]->cost==14 && user[user.size()-1]->cost==2){
+            user[0]->cost=1;
+            sort(user.begin(), user.end(),sort_cost);
+
+        }
+        for(;i<user.size();i++){
+            if(checkQueue ==user[i]->cost+1){// проверка последовательности
+
+                score +=user[i]->cost;
+                checkQueue--;
+                counter++;
+                if(counter==5){
+                    if( user[0]->cost==6){
+                        for(auto c : user)if(c->cost==1)c->cost=14;
+                        return   make_pair(score,1); // 6 5 4 3 2
+                    }
+                    else{
+                        for(auto c : user)if(c->cost==1)c->cost=14;
+                        return   make_pair(score,0); // 5 4 3 2 A
+                    }
+
+                }
+            }
+            else{
+                score=checkQueue=user[i]->cost;
+                counter=1;
+            }
+
+        }
+        for(auto c : user)if(c->cost==1)c->cost=14;
+        return make_pair(0,0);
+    }
+    static pair<int,int>flush( vector<Card*> &user){
+        sort(user.begin(), user.end(),sort_cost_more);
+        // show(user);
+        int score=0,counter=0,pos=0;
+        size_t i=0;
+        for(;i<user.size();i++){
+            if(user[pos]->rang.at(0) ==user[i]->rang.at(0)){// все одной масти
+                counter++;
+                score +=user[i]->cost;
+                if(counter==5){
+                    return make_pair(user[i-4]->cost,score);
+                }
+            }else{
+                pos=i;
+                counter=1;
+                score =user[i]->cost;
+            }
+        }
+        if(counter==5)
+            return make_pair(user[i-4]->cost,score);
+        else
+            return  make_pair(0,0);
+
+    }
     static pair<int,int> full_House( vector<Card*> &user){
         sort(user.begin(), user.end(),sort_q);
-         map<int,int> countUniq;
-          countUniq[user[0]->cost]=1;
-          map<int,int>::iterator it;
-      int comb3=0, comb2=0;
+        map<int,int> countUniq;
+        countUniq[user[0]->cost]=1;
+        map<int,int>::iterator it;
+        int comb3=0, comb2=0;
         for(size_t i=1;i<user.size();i++){
-             it = countUniq.find(user[i]->cost);
-             if(it == countUniq.end())
-                  countUniq[user[i]->cost]=1;
-             else
-                 it->second++;
+            it = countUniq.find(user[i]->cost);
+            if(it == countUniq.end())
+                countUniq[user[i]->cost]=1;
+            else
+                it->second++;
         }
 
         for(auto e :countUniq){
             if(e.second==3)comb3=e.first;
             if(e.second==2)comb2=e.first;
         }
-         if(comb3 && comb2)
-             return make_pair(comb3,comb2);
+        if(comb3 && comb2)
+            return make_pair(comb3,comb2);
         return make_pair(0,0);
     }
     static int straight_Flush( vector<Card*> &user){
@@ -67,19 +209,19 @@ class FindWinner{
         sort(user.begin(), user.end(),sort_cost);
 
         int score, checkQueue,counter =1;;
-          score=checkQueue=user[0]->cost;
+        score=checkQueue=user[0]->cost;
         for(size_t i=1;i<user.size();i++){
             if(checkQueue ==user[i]->cost){// проверка последовательности
                 score +=user[i]->cost;
                 counter++;
                 if(counter==4){
-                  vector<int> cards;
+                    vector<int> cards;
                     for(size_t j=0;j<user.size();j++)
                         if(user[j]->cost!=user[i]->cost){
-                               cards.push_back(user[j]->cost);
+                            cards.push_back(user[j]->cost);
 
                         }
-                     sort(cards.begin(),cards.end());//поиск старшей из оставших
+                    sort(cards.begin(),cards.end());//поиск старшей из оставших
                     return make_pair(score,cards[cards.size()-1]);
                 }
 
@@ -100,24 +242,38 @@ public:
         return (c1->rang > c2->rang );
     }
     static inline bool sort_cost(const Card *c1, const Card *c2){
-        return ( c1->cost < c2->cost);
+        return ( c1->cost > c2->cost);
+    }
+    static inline bool sort_cost_more(const Card *c1, const Card *c2){
+        return (c1->rang.at(0) == c2->rang.at(0));
     }
     static inline bool sort_q(const Card *c1, const Card *c2){
         return (c1->id < c2->id);
     }
-    template <typename T>
-    static  bool IsSubset(std::vector<T> A, std::vector<T> B)
-    {
-        //        std::sort(A.begin(), A.end(),more_rang);
-        //        std::sort(B.begin(), B.end(),more_rang);
-        return std::includes(A.begin(), A.end(), B.begin(), B.end());
-    }
-    void takeCards(vector<Card*> &commonCards,deque<Player *> &player){
+
+    static  void findWinner(vector<Card*> &commonCards,deque<Player *> &players){
+
+        multimap< string, pair<int,int>> result;
+        for(auto player : players){
+            if(player->getFold()==false){
+                vector<Card*> cp = commonCards;
+                std::move(player->getCards().begin(),player->getCards().end(), std::back_inserter(cp));
+
+                for(auto c : player->getCards())cp.push_back(c);
+                pair<pair<int,int>,string> p=takeCards(cp);
+                player->setCombo(p.second);
+                player->setCombLast(p.first);
+               // result.insert(pair< string, pair<int,int>>(p.second,p.first));
+
+            }
+        }
+//        for(auto r : result)
+//            cout<<r.first<<endl;
 
     }
 
 
-    static pair<pair<int,int>,string> findWinner(vector<Card*> &user){
+    static pair<pair<int,int>,string> takeCards(vector<Card*> &user){
         //Royal_Flush
         for(int i = 0; i<4;i++)
             if(eqCards(Royal_Flush[i],user))
@@ -129,13 +285,37 @@ public:
             return make_pair(make_pair(score,0), string("Straight Flush"));
         // CORE
         pair<int,int>  scoreFour = four_of_card(user);
-         if(scoreFour.first)
-              return make_pair(scoreFour, string("CORE"));
-      //Full House
-       pair<int,int> score3_2 = full_House(user);
-            if(score3_2.first)
-                return make_pair(score3_2, string("Full House"));
-        return  make_pair(make_pair(0,0)," EMPTY");
+        if(scoreFour.first)
+            return make_pair(scoreFour, string("CORE"));
+        //Full House
+        pair<int,int> score3_2 = full_House(user);
+        if(score3_2.first)
+            return make_pair(score3_2, string("Full House"));
+
+        //Flush     //<старшая, карта остаток>
+        pair<int,int> score_flush = flush(user);
+        if(score_flush.first)
+            return make_pair(score_flush,string("Flush"));
+
+        //Straight // <~, 1 || 0> see straight(user)
+        pair<int,int> score_straight =straight(user);
+        if(score_straight.first)
+            return make_pair(score_straight,string("Sraight"));
+        // Сет (Three of a Kind)
+        pair<int,int> score_three_of_kind = three_of_kind(user);
+        if(score_three_of_kind.first)
+            return make_pair(score_three_of_kind,"Set");
+        //Two-pair  /// нет проверки 5 карты
+        pair<int,int> score_two_pair=two_pair(user);
+        if(score_two_pair.first)
+            return make_pair(score_two_pair,"Two pair");
+        //One-pair
+        pair<int,int> score_one_pair=one_pair(user);
+        if(score_one_pair.first)
+            return make_pair(score_one_pair,"One pair");
+        //High-card
+        sort(user.begin(), user.end(),sort_cost);
+        return  make_pair(make_pair(user[0]->cost,0)," High card");
     }
 
     static void show(vector<Card *> cards){

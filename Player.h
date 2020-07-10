@@ -8,6 +8,7 @@ class Player{
     bool diller=false;
     bool fold =false;
     string combo="";
+    pair<int,int> comb_and_last=make_pair(0,0); // карта комбинации , карта(сумма) вне комбинации
     int money;
 public:
     Player(string name,int m=1000){
@@ -17,13 +18,18 @@ public:
     void setCards(Card * card){
         cards.push_back(card);
     }
+    vector<Card *> getCards(){
+        return cards;
+    }
     void show(){
+        if(winner)cout<<"Winner ";
+        else cout<<"Loser ";
         cout<<name<<" has: ";
         for(auto c :cards)
             cout<<c->rang<<" ";
         cout<<" money "<<money<<endl;
-        if(combo !="")
-            cout<<"Комбинация/статус: "<<combo<<endl;
+        cout<<"Комбинация/статус: "<<combo<<" карта "
+           <<comb_and_last.first<<" допкарта "<<comb_and_last.second<<endl;
     }
     int raise(int st){
         cout<<" Raise ";
@@ -45,7 +51,7 @@ public:
             if(c=='p' || c=='t')
                 cout<<"Raise 1, call 2, fold 3"<<endl;
             if(c=='f')
-                 cout<<"Raise 1, check 4, fold 3"<<endl;
+                cout<<"Raise 1, check 4, fold 3"<<endl;
             int s;cin>>s;
             switch (s) {
             case 1:
@@ -55,12 +61,12 @@ public:
                 return stavke;
             case 3:
                 fold=1;
-                combo="Фолд";
+                combo="Fold";
                 return 0;
-             case 4:
+            case 4:
                 return 0;
             }
-             return 0;
+            return 0;
         }
 
     }
@@ -69,7 +75,7 @@ public:
             cout<<name<<" сделал ставку "<<b<<endl;
             if(money==0) {
                 fold=1;
-                combo="Нет денег";
+                combo="No money";
                 return 0;
             }
             //        else if( b <money){
@@ -93,12 +99,20 @@ public:
     }
     void setDiller(bool d){diller=d;}
     bool getDiller(){return diller;}
-    void setFold(bool d){fold=d;}
+    void setFold(bool d){
+        combo="Fold";
+        fold=d;}
     bool getFold(){return fold;}
     void setWinner(bool d){winner=d;}
     bool getWinner(){return winner;}
     void setCombo(string str){combo=str;}
     string getCombo(){return combo;}
+    void setCombLast(pair<int,int> p){
+        comb_and_last = p;
+    }
+    pair<int,int>  getCombLast(){
+        return   comb_and_last;
+    }
 };
 
 #endif // PLAYER_H

@@ -16,7 +16,7 @@ class Card{
         id=++static_queue;
         this->rang=rang;
         this->path=path;
-        cost = stoi(rang.substr(1));
+        cost = stoi(rang.substr(1,2));
     }
 };
 class CardDeck{
