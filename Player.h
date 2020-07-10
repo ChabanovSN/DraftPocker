@@ -4,7 +4,7 @@
 class Player{
     string name="";
     vector <Card *> cards;
-    int statusWinner = 100; // поиск среди победителей с минимальным статусом
+    int statusWinner = 0; // поиск среди победителей с max статусом
     bool winner=false;
     bool diller=false;
     bool fold =false;

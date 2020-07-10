@@ -7,19 +7,20 @@
 using namespace std;
 int main(){
 vector<Card *> combo={
-        new Card("S12L"),new Card("H3"),new Card("H4"),
-                             new Card("C8"), new Card("C10")
+        new Card("D12L"),new Card("C13K"),new Card("D7"),
+                             new Card("C14A"), new Card("S8")
 };
   deque<Player *> pl;
   Player * m= new Player("My");
-  m->setCards(new Card("S7")); m->setCards(new Card("S8"));
+  m->setCards(new Card("C5")); m->setCards(new Card("C6"));
+ //  m->setFold(1);
   pl.push_back(m);
   Player * c= new Player("Comp1");
   c->setCards(new Card("C7")); c->setCards(new Card("C14A"));
- // c->setFold(1);
+  c->setFold(1);
   pl.push_back(c);
   Player * c2= new Player("Comp2");
-  c2->setCards(new Card("C5")); c2->setCards(new Card("C3"));
+  c2->setCards(new Card("S4")); c2->setCards(new Card("D10"));
  // c2->setFold(1);
   pl.push_back(c2);
   FindWinner::findWinner(combo,pl);

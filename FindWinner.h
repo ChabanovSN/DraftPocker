@@ -139,15 +139,17 @@ class FindWinner{
         sort(user.begin(), user.end(),sort_cost_more);
         // show(user);
         int score=0,counter=0,pos=0;
-        size_t i=0;
+        size_t i=0;   int maxC=0;
         for(;i<user.size();i++){
             if(user[pos]->rang.at(0) ==user[i]->rang.at(0)){// все одной масти
                 counter++;
+                if(user[i]->cost>maxC)maxC=user[i]->cost;
                 score +=user[i]->cost;
                 if(counter==5){
-                    return make_pair(user[i-4]->cost,score);
+                    return make_pair(maxC,score);
                 }
             }else{
+                maxC=0;
                 pos=i;
                 counter=1;
                 score =user[i]->cost;
@@ -235,14 +237,15 @@ class FindWinner{
 
     }
     static pair<int,int> countWinners(deque<Player *> &players){
-        int minStatus = 100,counter=0;
+        int minStatus = 0,counter=0;
         for(auto player : players)
-            if(player->getStatusWinner()<minStatus)
+            if(player->getStatusWinner()>minStatus)
                 minStatus=player->getStatusWinner();
 
         for(auto player : players)
             if(player->getStatusWinner()== minStatus){
                 counter++;
+                //  player->show();
                 player->setWinner(true);
             }
         return make_pair(counter,minStatus);
@@ -252,23 +255,23 @@ class FindWinner{
         for(auto player : players){ // поиск победитля по комбо в классе игрока
             if(player->getFold()==false){
                 if(player->getCombo()=="Royal Flush")
-                    player->setStatusWinner(1);
+                    player->setStatusWinner(100);
                 else  if(player->getCombo()=="Straight Flush")
-                    player->setStatusWinner(2);
+                    player->setStatusWinner(99);
                 else if(player->getCombo()=="Core")
-                    player->setStatusWinner(3);
+                    player->setStatusWinner(98);
                 else if(player->getCombo()=="Full House")
-                    player->setWinner(4);
+                    player->setWinner(97);
                 else if(player->getCombo()=="Flush")
-                    player->setStatusWinner(5);
+                    player->setStatusWinner(96);
                 else if(player->getCombo()=="Sraight")
-                    player->setStatusWinner(6);
+                    player->setStatusWinner(95);
                 else if(player->getCombo()=="Set")
-                    player->setStatusWinner(7);
+                    player->setStatusWinner(94);
                 else if(player->getCombo()=="Two pair")
-                    player->setStatusWinner(8);
+                    player->setStatusWinner(93);
                 else if(player->getCombo()=="One pair")
-                    player->setStatusWinner(9);
+                    player->setStatusWinner(92);
                 else if(player->getCombo()=="High card")
                     player->setStatusWinner(player->getCombLast().first);
 
@@ -280,11 +283,11 @@ class FindWinner{
             for(auto player : players)
                 if(player->getFold()==false){
                     player->setWinner(0);
-                    if(player->getStatusWinner()== countWinners(players).second){
+                    if(player->getStatusWinner()== counter_minSatus.second){
 
                         player->setStatusWinner(player->getCombLast().first);// установка номинала выиграшной карты
                     }else  // избовление от осtальных
-                        player->setStatusWinner(100);
+                        player->setStatusWinner(0);
                 }
         }
         //если камбо карты совпали сравниваем остаток
@@ -293,19 +296,17 @@ class FindWinner{
             for(auto player : players)
                 if(player->getFold()==false){
                     player->setWinner(0);
-                    if(player->getStatusWinner()== countWinners(players).second){
+                    if(player->getStatusWinner()== counter_minSatus.second){
 
                         player->setStatusWinner(player->getCombLast().second);// установка остаточной карты
                     }else  // избовление от осtальных
-                        player->setStatusWinner(100);
+                        player->setStatusWinner(0);
                 }
 
             countWinners(players);  // устанавливаем  победителя и глубже не лезем.... пока
         }
 
     }
-
-public:
     static inline bool sort_rang(const Card *c1, const Card *c2){
         return (c1->rang > c2->rang );
     }
@@ -318,6 +319,9 @@ public:
     static inline bool sort_q(const Card *c1, const Card *c2){
         return (c1->id < c2->id);
     }
+
+public:
+
     static  void findWinner(vector<Card*> &commonCards,deque<Player *> &players){
         multimap< string, pair<int,int>> result;
         for(auto player : players){
@@ -376,7 +380,7 @@ public:
             return make_pair(score_one_pair,"One pair");
         //High-card
         sort(user.begin(), user.end(),sort_cost);
-        return  make_pair(make_pair(user[0]->cost,0),"High card");
+        return  make_pair(make_pair(user[0]->cost,user[1]->cost),"High card");
     }
     static void show(vector<Card *> cards){
         int row=0;
