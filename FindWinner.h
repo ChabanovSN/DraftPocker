@@ -13,10 +13,6 @@ static vector<Card *> Royal_Flush[4]={{new Card("D14A"),new Card("D13K"),new Car
                                       {new Card("S14A"),new Card("S13K"),new Card("S12L"),
                                        new Card("S11J"),new Card("S10")}};
 
-
-
-
-
 class FindWinner{
     static pair<int,int> one_pair(vector<Card*> &user){
         sort(user.begin(), user.end(),sort_q);
@@ -276,7 +272,10 @@ class FindWinner{
                     player->setStatusWinner(player->getCombLast().first);
 
             }
-        }
+        } //сравниние по рангу вслучае 2 и более одиаковых крат при Hight card
+
+
+
         // поиск Победителя
         pair<int,int> counter_minSatus =countWinners(players);
         if(counter_minSatus.first>1){
@@ -284,7 +283,6 @@ class FindWinner{
                 if(player->getFold()==false){
                     player->setWinner(0);
                     if(player->getStatusWinner()== counter_minSatus.second){
-
                         player->setStatusWinner(player->getCombLast().first);// установка номинала выиграшной карты
                     }else  // избовление от осtальных
                         player->setStatusWinner(0);
@@ -304,6 +302,7 @@ class FindWinner{
                 }
 
             countWinners(players);  // устанавливаем  победителя и глубже не лезем.... пока
+
         }
 
     }
@@ -327,10 +326,11 @@ public:
         for(auto player : players){
             if(player->getFold()==false){
                 vector<Card*> cp = commonCards;
+                vector<Card*> plCards = player->getCards();
                 std::move(player->getCards().begin(),player->getCards().end(), std::back_inserter(cp));
 
                 for(auto c : player->getCards())cp.push_back(c);
-                pair<pair<int,int>,string> p=takeCards(cp);
+                pair<pair<int,int>,string> p=takeCards(plCards,cp);
                 player->setCombo(p.second);
                 player->setCombLast(p.first);
             }
@@ -338,7 +338,7 @@ public:
         setStatusWinnerFromCombo(players);
 
     }
-    static pair<pair<int,int>,string> takeCards(vector<Card*> &user){
+    static pair<pair<int,int>,string> takeCards(vector<Card*> &user2Cards,vector<Card*> &user){
         //Royal_Flush
         for(int i = 0; i<4;i++)
             if(eqCards(Royal_Flush[i],user))
@@ -379,8 +379,8 @@ public:
         if(score_one_pair.first)
             return make_pair(score_one_pair,"One pair");
         //High-card
-        sort(user.begin(), user.end(),sort_cost);
-        return  make_pair(make_pair(user[0]->cost,user[1]->cost),"High card");
+        sort(user2Cards.begin(), user2Cards.end(),sort_cost);
+        return  make_pair(make_pair(user2Cards[0]->cost,user2Cards[1]->cost),"High card");
     }
     static void show(vector<Card *> cards){
         int row=0;

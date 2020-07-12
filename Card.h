@@ -18,6 +18,7 @@ class Card{
         this->path=path;
         cost = stoi(rang.substr(1,2));
     }
+    bool operator==(const Card& rhs) const { return this->rang == rhs.rang;}
 };
 class CardDeck{
 public:
