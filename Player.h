@@ -8,6 +8,7 @@ class Player{
     bool winner=false;
     bool diller=false;
     bool fold =false;
+    int MaxStavka = 0;
     string combo="";
     pair<int,int> comb_and_last=make_pair(0,0); // карта комбинации , карта(сумма) вне комбинации
     int money;
@@ -21,6 +22,12 @@ public:
     }
     vector<Card *> getCards(){
         return cards;
+    }
+    string getName(){
+        return name;
+    }
+    void setMaxStavka(int s){
+        MaxStavka =s;
     }
     void show(){
         if(winner)cout<<"Winner ";
@@ -40,36 +47,43 @@ public:
             cout<<" Raise again! ";
             cin>>r;
         }
-        return getBlind(r);
+         cout<<" Raise "<<r<<endl;
+        money -=r;
+        return getBlind(r); // здесь для экономии просто переназначает ставку
     }
-    int decideStep(int stavke,char c){
+    int decideStep(int stavke){
         // fold , raise, call;
-
+    //  show();
         if(fold)
             return 0;
         else{
             if(diller)cout<<name<<" очередь ";
             cout<<name<<" THINK!!"<<endl;
-            if(c=='p' || c=='t')
-                cout<<"Raise 1, call 2, fold 3"<<endl;
-            if(c=='f')
-                cout<<"Raise 1, check 4, fold 3"<<endl;
+
+               if(MaxStavka==stavke)                       // p префлоп t терн
+                cout<<"Raise 1, fold 3, check 4"<<endl;
+               else
+                   cout<<"Raise 1, call 2, fold 3"<<endl;
             int s;cin>>s;
             switch (s) {
             case 1:
                 return raise(stavke);
             case 2:
+                cout<<" call "<<stavke<<endl;
                 money -=stavke;
+                MaxStavka=stavke;
                 return stavke;
             case 3:
                 fold=1;
                 combo="Fold";
+                 cout<<" fold "<<endl;
                 return 0;
             case 4:
+                  cout<<" check "<<endl;
                 return 0;
             }
             return 0;
-        }
+         }
 
     }
     int getBlind(int b){
