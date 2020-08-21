@@ -1,7 +1,7 @@
 #ifndef FINDWINNER_H
 #define FINDWINNER_H
 #include"Game.h"
-#include <utility>
+//#include <utility>
 #include<algorithm>
 #include<map>
 static vector<Card *> Royal_Flush[4]={{new Card("D14A"),new Card("D13K"),new Card("D12L"),
@@ -14,7 +14,7 @@ static vector<Card *> Royal_Flush[4]={{new Card("D14A"),new Card("D13K"),new Car
                                        new Card("S11J"),new Card("S10")}};
 
 class FindWinner{
-    static pair<int,int> one_pair(vector<Card*> &user){
+    pair<int,int> one_pair(vector<Card*> &user){
         sort(user.begin(), user.end(),sort_q);
         map<int,int,greater <int> > countUniq;
         countUniq[user[0]->cost]=1;
@@ -44,7 +44,7 @@ class FindWinner{
 
         return make_pair(0,0);
     }
-    static pair<int,int> two_pair(vector<Card*> &user){
+    pair<int,int> two_pair(vector<Card*> &user){
         sort(user.begin(), user.end(),sort_q);
         // show(user);
         map<int,int,greater <int> > countUniq;
@@ -69,7 +69,7 @@ class FindWinner{
             return make_pair(comb2_B,comb2_S);
         return make_pair(0,0);
     }
-    static pair<int,int> three_of_kind(vector<Card*> &user){
+    pair<int,int> three_of_kind(vector<Card*> &user){
         sort(user.begin(), user.end(),sort_q);
         map<int,int> countUniq;
         countUniq[user[0]->cost]=1;
@@ -93,7 +93,7 @@ class FindWinner{
             return make_pair(comb3,maxC);
         return make_pair(0,0);
     }
-    static pair<int,int> straight(vector<Card*> &user){
+    pair<int,int> straight(vector<Card*> &user){
         sort(user.begin(), user.end(),sort_cost);
 
         int score, checkQueue,counter=1;
@@ -131,7 +131,7 @@ class FindWinner{
         for(auto c : user)if(c->cost==1)c->cost=14;
         return make_pair(0,0);
     }
-    static pair<int,int>flush( vector<Card*> &user){
+    pair<int,int>flush( vector<Card*> &user){
         sort(user.begin(), user.end(),sort_cost_more);
         // show(user);
         int score=0,counter=0,pos=0;
@@ -157,7 +157,7 @@ class FindWinner{
             return  make_pair(0,0);
 
     }
-    static pair<int,int> full_House( vector<Card*> &user){
+    pair<int,int> full_House( vector<Card*> &user){
         sort(user.begin(), user.end(),sort_q);
         map<int,int> countUniq;
         countUniq[user[0]->cost]=1;
@@ -179,7 +179,7 @@ class FindWinner{
             return make_pair(comb3,comb2);
         return make_pair(0,0);
     }
-    static int straight_Flush( vector<Card*> &user){
+    int straight_Flush( vector<Card*> &user){
         sort(user.begin(), user.end(),sort_q);
         int score, checkQueue;
         score=checkQueue=user[0]->cost;
@@ -195,14 +195,14 @@ class FindWinner{
         }
         return score;
     }
-    static bool eqCards(const vector <Card*> &combo, const vector<Card*> &user){
+    bool eqCards(const vector <Card*> &combo, const vector<Card*> &user){
         size_t counter = combo.size();
         for(size_t i=0;i<user.size();i++)
             for(size_t j=0;j<combo.size();j++)
                 if(user[i]->rang==combo[j]->rang)counter--;
         return !counter;
     }
-    static pair<int,int> four_of_card( vector<Card*> &user){
+    pair<int,int> four_of_card( vector<Card*> &user){
         sort(user.begin(), user.end(),sort_cost);
 
         int score, checkQueue,counter =1;;
@@ -232,21 +232,26 @@ class FindWinner{
         return make_pair(0,0);
 
     }
-    static pair<int,int> countWinners(deque<Player *> &players){
-        int minStatus = 0,counter=0;
+    pair<int,int> countWinners(deque<Player *> &players){
+        int maxStatus = 0,counter=0;
         for(auto player : players)
-            if(player->getStatusWinner()>minStatus)
-                minStatus=player->getStatusWinner();
+            if(player->getStatusWinner()>maxStatus)
+                maxStatus=player->getStatusWinner();
 
         for(auto player : players)
-            if(player->getStatusWinner()== minStatus){
+            if(player->getStatusWinner()== maxStatus && maxStatus>0){
                 counter++;
-                //  player->show();
-                player->setWinner(true);
+                if(player->getFold()==false)
+                     player->setWinner(true);
+              //  cout<<"counter winner maxStatus"<<maxStatus<<" " << player->show()<<endl;
+
             }
-        return make_pair(counter,minStatus);
+            else
+                player->setWinner(false);
+
+        return make_pair(counter,maxStatus);
     }
-    static void setStatusWinnerFromCombo(deque<Player *> &players){
+    void setStatusWinnerFromCombo(deque<Player *> &players){
         // int countWinner = 0;
         for(auto player : players){ // поиск победитля по комбо в классе игрока
             if(player->getFold()==false){
@@ -271,38 +276,40 @@ class FindWinner{
                 else if(player->getCombo()=="High card")
                     player->setStatusWinner(player->getCombLast().first);
 
-            }
+            }else {
+               player->setStatusWinner(0);
+}
         } //сравниние по рангу вслучае 2 и более одиаковых крат при Hight card
 
 
 
         // поиск Победителя
-        pair<int,int> counter_minSatus =countWinners(players);
-        if(counter_minSatus.first>1){
+        pair<int,int> counter_maxSatus =countWinners(players);
+        if(counter_maxSatus.first>1){
             for(auto player : players)
                 if(player->getFold()==false){
-                    player->setWinner(0);
-                    if(player->getStatusWinner()== counter_minSatus.second){
+                  //  player->setWinner(0);
+                    if(player->getStatusWinner()== counter_maxSatus.second){
                         player->setStatusWinner(player->getCombLast().first);// установка номинала выиграшной карты
                     }else  // избовление от осtальных
                         player->setStatusWinner(0);
                 }
-        }
-        //если камбо карты совпали сравниваем остаток
-        counter_minSatus =countWinners(players);
-        if(counter_minSatus.first>1){
-            for(auto player : players)
-                if(player->getFold()==false){
-                    player->setWinner(0);
-                    if(player->getStatusWinner()== counter_minSatus.second){
 
-                        player->setStatusWinner(player->getCombLast().second);// установка остаточной карты
-                    }else  // избовление от осtальных
-                        player->setStatusWinner(0);
-                }
+            //если камбо карты совпали сравниваем остаток
+            counter_maxSatus =countWinners(players);
+            if(counter_maxSatus.first>1){
+                for(auto player : players)
+                    if(player->getFold()==false){
+                        player->setWinner(0);
+                        if(player->getStatusWinner()== counter_maxSatus.second){
 
-            countWinners(players);  // устанавливаем  победителя и глубже не лезем.... пока
+                            player->setStatusWinner(player->getCombLast().second);// установка остаточной карты
+                        }else  // избовление от осtальных
+                            player->setStatusWinner(0);
+                    }
 
+                countWinners(players);  // устанавливаем  победителя и глубже не лезем.... пока
+            }
         }
 
     }
@@ -321,24 +328,24 @@ class FindWinner{
 
 public:
 
-    static  void findWinner(vector<Card*> &commonCards,deque<Player *> &players){
+    void findWinner(vector<Card*> &commonCards,deque<Player *> &players){
         multimap< string, pair<int,int>> result;
+
         for(auto player : players){
             if(player->getFold()==false){
                 vector<Card*> cp = commonCards;
                 vector<Card*> plCards = player->getCards();
-                std::move(player->getCards().begin(),player->getCards().end(), std::back_inserter(cp));
-
                 for(auto c : player->getCards())cp.push_back(c);
                 pair<pair<int,int>,string> p=takeCards(plCards,cp);
                 player->setCombo(p.second);
                 player->setCombLast(p.first);
+
             }
         }
         setStatusWinnerFromCombo(players);
 
     }
-    static pair<pair<int,int>,string> takeCards(vector<Card*> &user2Cards,vector<Card*> &user){
+    pair<pair<int,int>,string> takeCards(vector<Card*> &user2Cards,vector<Card*> &user){
         //Royal_Flush
         for(int i = 0; i<4;i++)
             if(eqCards(Royal_Flush[i],user))
@@ -382,7 +389,7 @@ public:
         sort(user2Cards.begin(), user2Cards.end(),sort_cost);
         return  make_pair(make_pair(user2Cards[0]->cost,user2Cards[1]->cost),"High card");
     }
-    static void show(vector<Card *> cards){
+    void show(vector<Card *> cards){
         int row=0;
         for(auto c : cards){
             cout<<c->rang<<" "<<"cost "<<c->cost<<" ";row++;
